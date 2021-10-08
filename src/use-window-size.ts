@@ -2,25 +2,23 @@ import { useCallback, useEffect, useRef } from 'preact/hooks'
 
 type ResizeDirection = 'both' | 'horizontal' | 'vertical'
 
-const RESIZE_HANDLE_SIZE = 12
-
 const mapResizeDirectionToStyles: Record<
   ResizeDirection,
   { cursor: string; height: string; width: string }
 > = {
   both: {
     cursor: 'nwse-resize',
-    height: `${RESIZE_HANDLE_SIZE}px`,
-    width: `${RESIZE_HANDLE_SIZE}px`
+    height: '12px',
+    width: '12px'
   },
   horizontal: {
     cursor: 'ew-resize',
     height: '100%',
-    width: `${RESIZE_HANDLE_SIZE}px`
+    width: '8px'
   },
   vertical: {
     cursor: 'ns-resize',
-    height: `${RESIZE_HANDLE_SIZE}px`,
+    height: '8px',
     width: '100%'
   }
 }
@@ -36,6 +34,9 @@ export function useWindowSize(
     toggleWindowSizeOnDoubleClick?: boolean
   } = {}
 ): (size: { width: number; height: number }) => void {
+  const initialWidth = window.innerWidth
+  const initialHeight = window.innerHeight
+
   const toggleWindowSizeOnDoubleClick =
     typeof options.toggleWindowSizeOnDoubleClick === 'undefined' ? false : true
   const resizeDirection =
@@ -51,17 +52,13 @@ export function useWindowSize(
       ? Number.MAX_VALUE
       : options.maxWidth
   const minHeight =
-    typeof options.minHeight === 'undefined'
-      ? window.innerHeight
-      : options.minHeight
+    typeof options.minHeight === 'undefined' ? initialHeight : options.minHeight
   const minWidth =
-    typeof options.minWidth === 'undefined'
-      ? window.innerWidth
-      : options.minWidth
+    typeof options.minWidth === 'undefined' ? initialWidth : options.minWidth
 
   const windowSize = useRef({
-    height: window.innerHeight,
-    width: window.innerWidth
+    height: initialWidth,
+    width: initialHeight
   })
 
   const setWindowSize = useCallback(
@@ -86,32 +83,42 @@ export function useWindowSize(
   const toggleWindowSize = useCallback(
     function (resizeDirection: ResizeDirection) {
       if (resizeDirection === 'both' || resizeDirection === 'horizontal') {
-        if (
-          maxWidth !== Number.MAX_VALUE &&
-          windowSize.current.width < maxWidth
-        ) {
-          // Set to `maxWidth` if `options.maxWidth` was specified and the current width
-          // is less than `maxWidth`
-          windowSize.current.width = maxWidth
+        if (windowSize.current.width < initialWidth) {
+          // Set to `initialWidth` if the current width is less than `initialWidth`
+          windowSize.current.width = initialWidth
         } else {
-          windowSize.current.width = minWidth
+          if (
+            maxWidth !== Number.MAX_VALUE &&
+            windowSize.current.width < maxWidth
+          ) {
+            // Set to `maxWidth` if `options.maxWidth` was specified and the current width
+            // is less than `maxWidth`
+            windowSize.current.width = maxWidth
+          } else {
+            windowSize.current.width = initialWidth
+          }
         }
       }
       if (resizeDirection === 'both' || resizeDirection === 'vertical') {
-        if (
-          maxHeight !== Number.MAX_VALUE &&
-          windowSize.current.height < maxHeight
-        ) {
-          // Set to `maxHeight` if `options.maxHeight` was specified and the current height
-          // is less than `maxHeight`
-          windowSize.current.height = maxHeight
+        if (windowSize.current.height < initialHeight) {
+          // Set to `initialHeight` if the current height is less than `initialHeight`
+          windowSize.current.height = initialHeight
         } else {
-          windowSize.current.height = minHeight
+          if (
+            maxHeight !== Number.MAX_VALUE &&
+            windowSize.current.height < maxHeight
+          ) {
+            // Set to `maxHeight` if `options.maxHeight` was specified and the current height
+            // is less than `maxHeight`
+            windowSize.current.height = maxHeight
+          } else {
+            windowSize.current.height = initialWidth
+          }
         }
       }
       onWindowResize(windowSize.current)
     },
-    [maxHeight, maxWidth, minHeight, minWidth, onWindowResize]
+    [initialHeight, initialWidth, maxHeight, maxWidth, onWindowResize]
   )
 
   useEffect(
