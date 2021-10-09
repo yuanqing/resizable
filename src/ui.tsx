@@ -7,7 +7,13 @@ function Plugin() {
   useWindowSize(function (size: { width: number, height: number }) {
     emit('RESIZE_WINDOW', size)
     console.log(size)
-  }, { toggleWindowSizeOnDoubleClick: true, minWidth: 100, minHeight: 100, maxWidth: 400, maxHeight: 400 })
+  }, {
+    maxWidth: 400,
+    maxHeight: 400,
+    minHeight: 100,
+    minWidth: 100,
+    resizeBehaviorOnDoubleClick: 'minimize'
+  })
   return null
 }
 
